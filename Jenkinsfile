@@ -9,6 +9,11 @@ pipeline {
         }
 
         stage('Build React App') {
+            agent {
+                docker {
+                    image 'node:18'   // ✅ Runs inside Node.js container
+                }
+            }
             steps {
                 dir('my-app') {
                     sh 'npm install'
@@ -27,11 +32,7 @@ pipeline {
 
         stage('Run Container') {
             steps {
-                // Stop old container (if running) and run new one
-                sh '''
-                docker rm -f react-docker-container || true
-                docker run -d -p 80:80 --name react-docker-container react-docker-app
-                '''
+                sh 'docker run -d -p 3000:80 --name react-container --restart unless-stopped react-docker-app || true'
             }
         }
     }
